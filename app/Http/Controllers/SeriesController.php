@@ -12,31 +12,36 @@ class SeriesController extends Controller
     {
         // $series = DB::select('select nome from series');
         $series = Serie::query()->orderBy('nome')->get();
+        $mensagemSucesso = session('mensagem.sucesso');
+        $request->session()->forget('mensagem.sucesso');
 
-        return view('series.index', compact('series'));
+        return view('series.index')->with('series', $series)->with('mensagemSucesso', $mensagemSucesso);
 
     }
 
-    public function create()
+    public function create(Request $request)
     {
         return view('series.create');
     }
 
     public function store(Request $request)
     {
-        $nomeSerie = $request->input('nome');
+        Serie::create($request->all());
 
-        $serie = new Serie();
-        $serie->nome = $nomeSerie;
-        $serie->save();
-        return redirect('/series');
+        $request->session()->put('mensagem.sucesso', 'Série adicionada com sucesso');
 
+        return to_route('series.index');
 
-        // if(DB::insert('insert into series (nome) values (?)', [$nomeSerie])){
-        //     return redirect('/series');
-        // }else {
-        //     return "deu erro";
-        // }
+    }
+
+    public function destroy(Request $request)
+    {
+
+        Serie::destroy($request->series);
+
+        $request->session()->put('mensagem.sucesso', 'Série removida com sucesso');
+
+        return to_route('series.index');
 
     }
 }
